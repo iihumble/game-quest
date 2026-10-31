@@ -337,11 +337,53 @@ svg.map{width:100%;height:100%;display:block;position:absolute;inset:0}
 .daycard span{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--amber)}
 .daycard p{font-family:var(--serif);font-style:italic;color:var(--muted);max-width:50ch;margin:0;font-size:16px}
 
-@media (max-width:920px){
-  .main{grid-template-columns:1fr;grid-template-rows:40vh 1fr}
-  .mapwrap{border-right:0;border-bottom:1px solid var(--line)}
-  .topbar{gap:10px}.topbar .case b{font-size:17px}.moves b{font-size:22px}.day{display:none}
-  .drawer{height:86%}
+/* ---------- mobile ---------- */
+.mnav{display:none}
+@media (max-width:1100px) and (min-width:761px){
+  .main{grid-template-columns:minmax(0,1fr) minmax(340px,.9fr)}
+}
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .topbar{gap:10px;padding-block:8px}
+  .topbar .case b{font-size:17px}.topbar .case span{display:none}
+  .clock{gap:10px}.moves b{font-size:22px}.day{display:none}
+  .topbar .actions #btnPhone,.topbar .actions #btnCase{display:none}
+  .main{grid-template-columns:1fr;grid-template-rows:1fr}
+  .mapwrap,.panel{grid-area:1/1}
+  .mapwrap{border-right:0}
+  body[data-mv="panel"] .mapwrap{display:none}
+  body[data-mv="map"] .panel{display:none}
+  .maphead .leg{display:none}
+  .mapbox{overflow:auto;-webkit-overflow-scrolling:touch}
+  svg.map{position:static;height:100%;width:auto;min-width:100%}
+  .rain{width:max(100%,1000px)}
+  .map .node circle.halo{r:30}
+  .panel-scroll{padding-block:16px;gap:16px}
+  .loc-head h2{font-size:26px}
+  .mnav{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);background:var(--ink-2);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px))}
+  .mnav button{background:transparent;border:0;color:var(--muted);font-family:var(--ui);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:9px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;min-height:54px}
+  .mnav button .i{font-family:var(--display);font-size:18px;line-height:1;color:var(--text)}
+  .mnav button.on{color:var(--amber-2)}
+  .mnav button.on .i{color:var(--amber-2)}
+  .mnav button .badge{top:4px;right:calc(50% - 26px)}
+  .drawer{height:calc(100% - 56px - env(safe-area-inset-bottom,0px));bottom:calc(56px + env(safe-area-inset-bottom,0px))}
+  .tab{font-size:12px;padding:8px 9px}
+  .ev-grid{grid-template-columns:1fr 1fr}
+  .ded-grid,.sus-grid{grid-template-columns:1fr}
+  .doc{padding:22px 18px;font-size:14.5px}
+  .doc h3{font-size:21px}
+  .ticket{grid-template-columns:1fr}
+  .acc-wrap h2{font-size:28px}
+  .verdict{padding:24px 20px;font-size:15px}
+  .phone{width:100%}
+  .keypad{grid-template-columns:repeat(3,60px)}
+  .keypad button{width:60px;height:60px}
+  .intro-meta{gap:14px}
+  .brief{font-size:16px;min-height:0}
+}
+@media (max-width:420px){
+  .ev-grid{grid-template-columns:1fr}
+  .topbar .case b{font-size:15px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.daycard.on{display:none}}
 </style>
@@ -381,6 +423,12 @@ svg.map{width:100%;height:100%;display:block;position:absolute;inset:0}
     </div>
     <div class="panel"><div class="panel-scroll" id="panel"></div></div>
   </div>
+  <nav class="mnav" id="mnav" aria-label="Навигация">
+    <button data-mv="map" class="on"><span class="i">◎</span>Карта</button>
+    <button data-mv="panel"><span class="i">▣</span>Место</button>
+    <button data-mv="phone" id="mnavPhone"><span class="i">☎</span>Телефон<span class="badge" id="phoneBadge2" hidden>0</span></button>
+    <button data-mv="case"><span class="i">≡</span>Дело<span class="badge" id="caseBadge2" hidden>0</span></button>
+  </nav>
   <div class="drawer" id="drawer">
     <div class="drawer-head">
       <button class="tab on" data-tab="ev">Улики <span class="n" id="nEv">0</span></button>
@@ -789,7 +837,7 @@ function renderTop(){
   const di=dayInfo();$('#day').innerHTML=`<b>День ${di.d} · ${di.n}</b>${di.t} · ${di.w}`;
   $('#nEv').textContent=S.ev.length;$('#nDed').textContent=S.ded.length+'/8';
   const newEv=S.ev.filter(e=>!S.seen.includes(e)).length;const cb=$('#caseBadge');cb.hidden=!newEv;cb.textContent=newEv;
-  const pb=$('#btnPhone');pb.hidden=!S.phone.found;const un=Object.values(S.phone.unread).reduce((a,b)=>a+b,0);const bd=$('#phoneBadge');bd.hidden=!un;bd.textContent=un;
+  const pb=$('#btnPhone');pb.hidden=!S.phone.found;const un=Object.values(S.phone.unread).reduce((a,b)=>a+b,0);const bd=$('#phoneBadge');bd.hidden=!un;bd.textContent=un;const bd2=$('#phoneBadge2');bd2.hidden=!un;bd2.textContent=un;const cb2=$('#caseBadge2');cb2.hidden=!newEv;cb2.textContent=newEv;$('#mnavPhone').style.opacity=S.phone.found?'1':'.4';
 }
 function renderMap(){
   const svg=$('#map');
@@ -815,7 +863,7 @@ function goTo(k){
   if(!S.unlocked.includes(k)){toast(L.lockHint||'Пока закрыто.');return;}
   if(S.cur===k&&S.view==='loc')return;
   if(S.cur!==k){if(movesLeft()<=0){toast('Ходов не осталось.');openAccuse();return;}spend();S.cur=k;if(!S.visited.includes(k))S.visited.push(k);delete S.flags['fresh_'+k];logAdd(`Выезд: ${L.n}`);if(k==='nightmeet')S.flags.u_met=true;}
-  S.view='loc';S.talking=null;S.pvar=null;renderAll();save();
+  S.view='loc';S.talking=null;S.pvar=null;renderAll();save();if(isMobile())setMV('panel');
 }
 function evChip(id,isNew){const e=EVIDENCE[id];return `<button class="ev-chip ${isNew?'new':''}" data-ev="${id}"><span class="k">${e.k}</span><span>${e.t}</span></button>`;}
 
@@ -938,7 +986,7 @@ function renderPhone(p){
   const mp=$('#memoPlay');if(mp)mp.addEventListener('click',()=>{P.memoHeard=true;if(giveEv(MEMO.gives,'Диктофон телефона'))toast(`Улика: ${EVIDENCE[MEMO.gives].t}`);renderAll();save();});
   const thr=$('#thr');if(thr)thr.scrollTop=thr.scrollHeight;
 }
-function openPhone(){if(!S.phone.found)return;S.view='phone';S.pvar=null;closeDrawer();renderPanel();save();}
+function openPhone(){if(!S.phone.found){toast('Телефон Дильноры ещё не найден. Он в её квартире.');return;}S.view='phone';S.pvar=null;closeDrawer();renderPanel();save();if(isMobile())setMV('panel');}
 
 /* ============================================================
    ПАПКА ДЕЛА
@@ -960,8 +1008,11 @@ function renderDrawer(){
     b.innerHTML=`<div class="timeline">${S.log.length?S.log.map(l=>`<div class="tl ${l.sys?'sys':''}"><div class="t">${l.t}<small>день ${l.d}</small></div><div>${l.text}</div></div>`).join(''):'<div class="ev-empty">Хроника пуста.</div>'}</div>`;
   }
 }
-function openDrawer(){$('#drawer').classList.add('open');renderDrawer();}
-function closeDrawer(){$('#drawer').classList.remove('open');}
+function openDrawer(){$('#drawer').classList.add('open');renderDrawer();if(isMobile())document.querySelectorAll('#mnav button').forEach(b=>b.classList.toggle('on',b.dataset.mv==='case'));}
+function closeDrawer(){$('#drawer').classList.remove('open');if(isMobile())document.querySelectorAll('#mnav button').forEach(b=>b.classList.toggle('on',b.dataset.mv===document.body.dataset.mv));}
+const isMobile=()=>matchMedia('(max-width:760px)').matches;
+function setMV(v){document.body.dataset.mv=v;document.querySelectorAll('#mnav button').forEach(b=>b.classList.toggle('on',b.dataset.mv===v));if(v==='map')scrollMapToCurrent();}
+function scrollMapToCurrent(){if(!isMobile())return;const box=document.querySelector('.mapbox'),svg=$('#map'),L=LOCS[S.cur];if(!box||!L)return;const sc=svg.getBoundingClientRect().height/520;box.scrollLeft=Math.max(0,L.x*sc-box.clientWidth/2);}
 function renderAll(){renderTop();renderMap();renderPanel();if($('#drawer').classList.contains('open'))renderDrawer();}
 
 /* ============================================================
@@ -1009,13 +1060,15 @@ function finish(){
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));}
 const BRIEF='Сардоба, промышленный город у водохранилища. 14 сентября 29-летняя Дильнора Каримова, бухгалтер текстильной фабрики «Нурафшон», вышла с работы в 18:40 и не вернулась домой. Телефон последний раз был в сети в 21:17 у старого речного порта.\n\nЧерез две недели полиция закрыла дело: «добровольный уход». За день до исчезновения она сняла со счёта все сбережения.\n\nЕё отец не верит. Он передаёт материалы вам. У вас 40 ходов — пять дней, пока прокуратура не потребует либо обвинение, либо вашу подпись под версией полиции.';
 function typeBrief(){const el=$('#brief');let i=0;el.innerHTML='';const cur=document.createElement('span');cur.className='cur';const txt=document.createElement('span');el.append(txt,cur);if(matchMedia('(prefers-reduced-motion: reduce)').matches){txt.innerHTML=BRIEF.replace(/\n\n/g,'<br><br>');cur.remove();return;}(function step(){if(i<BRIEF.length){const ch=BRIEF[i++];if(ch==='\n')txt.append(document.createElement('br'));else txt.append(ch);setTimeout(step,ch==='.'?110:ch===','?55:16);}else cur.remove();})();}
-function startGame(fresh_){S=fresh_?fresh():(load()||fresh());if(S.over)S=fresh();show('game');renderAll();if(S.used===0&&!S.ev.length)toast('Начните с материалов дела. Осмотры бесплатны, переезды и вопросы стоят ход.');}
-function boot(snap){if(snap&&snap.S){S=snap.S;if(S.over)show('ending');else{show('game');renderAll();}}else{typeBrief();const sv=load();if(sv&&!sv.over&&sv.used>0)$('#btnContinue').hidden=false;}}
+function startGame(fresh_){S=fresh_?fresh():(load()||fresh());if(S.over)S=fresh();show('game');renderAll();setMV(S.used===0?'panel':'map');if(S.used===0&&!S.ev.length)toast('Начните с материалов дела. Осмотры бесплатны, переезды и вопросы стоят ход.');}
+function boot(snap){if(snap&&snap.S){S=snap.S;if(S.over)show('ending');else{show('game');renderAll();setMV('map');}}else{typeBrief();const sv=load();if(sv&&!sv.over&&sv.used>0)$('#btnContinue').hidden=false;}}
 $('#btnStart').addEventListener('click',()=>{clearSave();startGame(true);});
 $('#btnContinue').addEventListener('click',()=>startGame(false));
 $('#btnPhone').addEventListener('click',()=>{if(S.view==='phone'){S.view='loc';renderPanel();}else openPhone();});
 $('#btnCase').addEventListener('click',()=>{if($('#drawer').classList.contains('open'))closeDrawer();else openDrawer();});
 $('#btnCloseDrawer').addEventListener('click',closeDrawer);
+document.querySelectorAll('#mnav button').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.mv;if(v==='case'){if($('#drawer').classList.contains('open'))closeDrawer();else openDrawer();return;}closeDrawer();if(v==='phone'){openPhone();return;}if(v==='panel'&&S.view==='phone'){S.view='loc';renderPanel();}setMV(v);}));
+window.addEventListener('resize',()=>{if(isMobile()&&!document.body.dataset.mv)setMV('map');});
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{tab=t.dataset.tab;renderDrawer();}));
 $('#btnAccuse').addEventListener('click',openAccuse);
 $('#btnBackToCase').addEventListener('click',()=>{if(S.used>=TOTAL_MOVES){toast('Ходов нет. Нужно обвинение.');return;}show('game');renderAll();});
